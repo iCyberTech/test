@@ -60,13 +60,6 @@
       background-color: #f2f2f2;
     }
 
-    .avatar-preview {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
     /* Modal styling */
     .modal {
       position: fixed;
@@ -120,7 +113,6 @@
     // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
 
     // Your Firebase configuration
     const firebaseConfig = {
@@ -136,7 +128,6 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     let studentsInGroup = []; // Store loaded students globally
     let allStudents = []; // Store all students for the add students modal
@@ -174,7 +165,6 @@
           <table>
             <thead>
               <tr>
-                <th>Avatar</th>
                 <th>Name</th>
                 <th>Grade</th>
                 <th>Attendance</th>
@@ -189,10 +179,6 @@
         studentsInGroup.forEach(student => {
           tableHTML += `
             <tr>
-              <td>
-                <img src="${student.avatarUrl || 'https://via.placeholder.com/50'}" alt="Avatar" class="avatar-preview">
-                <input type="file" id="avatar_${student.id}" accept="image/*">
-              </td>
               <td><input type="text" id="name_${student.id}" value="${student.name}"></td>
               <td><input type="text" id="grade_${student.id}" value="${student.grade}"></td>
               <td><input type="number" id="attendance_${student.id}" value="${student.attendance}"></td>
@@ -201,7 +187,7 @@
               <td><button onclick="removeStudentFromGroup('${student.id}')">Remove</button></td>
             </tr>
             <tr>
-              <td colspan="7">
+              <td colspan="6">
                 <h4>Courses</h4>
                 <table>
                   <thead>
@@ -286,18 +272,6 @@
           const studentId = student.id;
           console.log('Processing student:', studentId); // Debugging
 
-          // Upload avatar if a new file is selected
-          const avatarFile = document.getElementById(`avatar_${studentId}`).files[0];
-          let avatarUrl = student.avatarUrl; // Default to existing avatar URL
-
-          if (avatarFile) {
-            console.log('Uploading avatar...'); // Debugging
-            const avatarRef = storageRef(storage, `avatars/${studentId}_${avatarFile.name}`);
-            await uploadBytes(avatarRef, avatarFile); // Upload the image
-            avatarUrl = await getDownloadURL(avatarRef); // Get the download URL
-            console.log('Avatar uploaded. URL:', avatarUrl); // Debugging
-          }
-
           // Update student data
           const updatedData = {
             name: document.getElementById(`name_${studentId}`).value,
@@ -305,7 +279,6 @@
             attendance: parseFloat(document.getElementById(`attendance_${studentId}`).value),
             marks: parseFloat(document.getElementById(`marks_${studentId}`).value),
             semester: document.getElementById(`semester_${studentId}`).value,
-            avatarUrl: avatarUrl, // Include the avatar URL
           };
 
           console.log('Updated Data:', updatedData); // Debugging
